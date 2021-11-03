@@ -22,7 +22,7 @@ def callback(data):
 
     rospy.loginfo(rospy.get_caller_id() + "\nAccel x: [{}]\n Accel y: [{}]\n Accel z: [{}]".format(data.linear_acceleration.x, data.linear_acceleration.y, data.linear_acceleration.z))
     rospy.loginfo(rospy.get_caller_id() + "\nAngular x: [{}]\n Angular y: [{}]\n Angular z: [{}]".format(data.angular_velocity.x, data.angular_velocity.y, data.angular_velocity.z))
-    
+
     accel_x = Float64()
     accel_x.data = float(0)
     accel_y = Float64()
@@ -34,11 +34,13 @@ def callback(data):
     if (data.linear_acceleration.y > 0.1 or data.linear_acceleration.y < -0.1):
         accel_y.data = data.linear_acceleration.y
 
-    velo_x.data = float(velo_x.data + (accel_x.data))
-    velo_y.data = float(velo_y.data + (accel_y.data))
+    velo_x.data = float(velo_x.data + (accel_x.data * 0.1))
+    velo_y.data = float(velo_y.data + (accel_y.data * 0.1))
 
-    distance_x.data = float(distance_x.data + velo_x.data)
-    distance_y.data = float(distance_y.data + velo_y.data)
+    distance_x.data = float(distance_x.data + velo_x.data * 0.1)
+    distance_y.data = float(distance_y.data + velo_y.data * 0.1)
+
+    rospy.loginfo(rospy.get_caller_id() + "Velo x: [{}]\nVelo y:[{}]\nDist x:[{}]\nDist y:[{}]".format(velo_x.data, velo_y.data, distance_x.data, distance_y.data))
 
     msg.data = [data.linear_acceleration.x, data.linear_acceleration.y, data.linear_acceleration.z, data.angular_velocity.x, data.angular_velocity.y, data.angular_velocity.z, velo_x.data, velo_y.data, distance_x.data, distance_y.data]
 
