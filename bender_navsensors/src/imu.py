@@ -22,8 +22,8 @@ def callback(data):
     global velo_y
     
     ## data for previous x and y acceleration values
-    global last_x
-    global last_y
+    global last_x_accel
+    global last_y_accel
     ## acceptable gap between data per clock cycle
     global tolerance
 
