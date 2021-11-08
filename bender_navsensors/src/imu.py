@@ -45,14 +45,14 @@ def callback(data):
 
 
     ## only accepts data that is within a given tolerance level between clock cycles ie. if jump is too big, data is thrown out
-    if ((abs(data.linear_acceleration.x) - abs(last_x)) < tolerance and (abs(data.linear_acceleration.x) - abs(last_x)) > (tolerance*-1)):
+    if ((abs(data.linear_acceleration.x) - abs(last_x)) < tolerance or (abs(data.linear_acceleration.x) - abs(last_x)) > (tolerance*-1)):
 
         ## filters out acceleration data that is too small ie. within margin of accepted error
        if (data.linear_acceleration.x > 0.1 or data.linear_acceleration.x < -0.1):
           accel_x.data = data.linear_acceleration.x
 
     ## only accepts data that is within a given tolerance level between clock cycles ie. if jump is too big, data is thrown out
-    if ((abs(data.linear_acceleration.y) - abs(last_y)) < tolerance and (abs(data.linear_acceleration.y) - abs(last_y)) > (tolerance*-1)):
+    if ((abs(data.linear_acceleration.y) - abs(last_y)) < tolerance or (abs(data.linear_acceleration.y) - abs(last_y)) > (tolerance*-1)):
       
     ## filters out acceleration data that is too small ie. within margin of accepted error
         if (data.linear_acceleration.y > 0.1 or data.linear_acceleration.y < -0.1):
