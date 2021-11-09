@@ -14,13 +14,20 @@ velo_x = Float64()
 velo_y = Float64()
 last_x_accel = None
 last_y_accel = None
-
+accel_x_list = []
+accel_y_list = []
+velo_x_list = []
+velo_y_list = []
 def callback(data):
     global msg
     global distance_x
     global distance_y
     global velo_x
     global velo_y
+    global accel_x_list
+    global accel_y_list
+    global velo_x_list
+    global velo_y_list
     
     ## data for previous x and y acceleration values
     global last_x_accel
@@ -68,7 +75,11 @@ def callback(data):
     ## sets acceleration data to be used for next cycle filtering
     last_x_accel = accel_x.data
     last_y_accel = accel_y.data
-
+    ## add acceleration and velocity data to arrays
+    accel_x_list.append(accel_x.data)
+    accel_y_list.append(accel_y.data)
+    velo_x_list.append(velo_x.data)
+    velo_y_list.append(velo_y.data)
     
 
     rospy.loginfo(rospy.get_caller_id() + "Velo x: [{}]\nVelo y:[{}]\nDist x:[{}]\nDist y:[{}]".format(velo_x.data, velo_y.data, distance_x.data, distance_y.data))
