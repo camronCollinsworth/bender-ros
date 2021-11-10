@@ -4,7 +4,6 @@ import rospy
 from std_msgs.msg import Float64MultiArray
 from std_msgs.msg import Float64
 from sensor_msgs.msg import Imu
-from scipy import integrate
 
 msg = Float64MultiArray()
 tolerance = 1   ## sets tolerance, or acceptable jump in data values between clock cycles
@@ -18,6 +17,7 @@ accel_x_list = []
 accel_y_list = []
 velo_x_list = []
 velo_y_list = []
+
 def callback(data):
     global msg
     global distance_x
@@ -32,6 +32,7 @@ def callback(data):
     ## data for previous x and y acceleration values
     global last_x_accel
     global last_y_accel
+
     ## acceptable gap between data per clock cycle
     global tolerance
 
@@ -50,7 +51,6 @@ def callback(data):
         last_x_accel = float(0)
     if last_y_accel is None:
         last_y_accel = float(0)
-
 
     ## only accepts data that is within a given tolerance level between clock cycles ie. if jump is too big, data is thrown out
     if (abs(data.linear_acceleration.x - last_x_accel) < tolerance):
@@ -75,14 +75,21 @@ def callback(data):
     ## sets acceleration data to be used for next cycle filtering
     last_x_accel = accel_x.data
     last_y_accel = accel_y.data
+
     ## add acceleration and velocity data to arrays
     accel_x_list.append(accel_x.data)
     accel_y_list.append(accel_y.data)
+
+    velo_x.data = float(accumulator(accel_x_list))
+    velo_y.data = float(accumulator(accel_y_list))
+
     velo_x_list.append(velo_x.data)
     velo_y_list.append(velo_y.data)
-    
 
-    rospy.loginfo(rospy.get_caller_id() + "Velo x: [{}]\nVelo y:[{}]\nDist x:[{}]\nDist y:[{}]".format(velo_x.data, velo_y.data, distance_x.data, distance_y.data))
+    distance_x.data = float(accumulator(velo_x_list))
+    distance_y.data = float(accumulator(velo_y_list))
+
+    rospy.loginfo(rospy.get_caller_id() + "\nVelo x: [{}]\nVelo y:[{}]\nDist x:[{}]\nDist y:[{}]".format(velo_x.data, velo_y.data, distance_x.data, distance_y.data))
 
     msg.data = [data.linear_acceleration.x, data.linear_acceleration.y, data.linear_acceleration.z, data.angular_velocity.x, data.angular_velocity.y, data.angular_velocity.z, velo_x.data, velo_y.data, distance_x.data, distance_y.data]
 
@@ -98,6 +105,13 @@ def imu():
     while not rospy.is_shutdown():
         pub.publish(msg)
         rate.sleep()
+
+def accumulator(array):
+    sum = 0
+    for i in array:
+        sum += i * 0.1
+
+    return sum
    
 if __name__ == '__main__':
        try:
