@@ -89,6 +89,17 @@ def callback(data):
     distance_x.data = float(accumulator(velo_x_list))
     distance_y.data = float(accumulator(velo_y_list))
 
+
+    ## shorten the size of lists to prevent getting too large
+    if len(accel_x_list) > 999:
+       accel_x_list = shortenList(accel_x_list)
+    if len(accel_y_list) > 999:
+       accel_y_list = shortenList(accel_y_list)
+    if len(velo_x_list) > 999:
+        velo_x_list = shortenList(velo_x_list)
+    if len(velo_y_list) > 999:
+        velo_y_list = shortenList(velo_y_list)
+
     rospy.loginfo(rospy.get_caller_id() + "\nVelo x: [{}]\nVelo y:[{}]\nDist x:[{}]\nDist y:[{}]".format(velo_x.data, velo_y.data, distance_x.data, distance_y.data))
 
     msg.data = [data.linear_acceleration.x, data.linear_acceleration.y, data.linear_acceleration.z, data.angular_velocity.x, data.angular_velocity.y, data.angular_velocity.z, velo_x.data, velo_y.data, distance_x.data, distance_y.data]
@@ -112,6 +123,19 @@ def accumulator(array):
         sum += i * 0.1
 
     return sum
+
+
+## takes an array and returns a new array with one element that is the sum of the given array
+def shortenList(array):
+    sum = 0
+    newArray = []
+
+    for i in array:
+        sum += i
+
+    newArray.append(sum)    
+    return newArray
+
    
 if __name__ == '__main__':
        try:
