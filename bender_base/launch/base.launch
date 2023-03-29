@@ -1,11 +1,13 @@
 <launch>
     <!-- ros_args.launch -->
-    <arg name="rviz" default="true"/>
-    <arg name="teleop" default="rqt" doc="[rqt, joy, none]"/> 
+    <arg name="rviz" default="false"/>
+    <arg name="teleop" default="joy" doc="[rqt, joy, none]"/> 
 
     <include file="$(find bender_description)/launch/description.launch" />
 
-    <node pkg="bender_base" required="true" type="node" name="bender_base_node" output="screen" />
+    <node pkg="bender_base" required="true" type="node" name="bender_base_node" output="screen">
+        <param name="port" value="/dev/ttyTeensy" />
+    </node>
 
     <!-- Load the control parameters -->
     <rosparam file="$(find bender_base)/config/bender_controllers.yaml" command="load"/>
@@ -17,7 +19,7 @@
     <!-- Convert joint states to TF transforms -->
 	<node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"
         respawn="false" output="screen">
-	    <rosparam param="publish_frequency">100</rosparam>
+	    <rosparam param="publish_frequency">10</rosparam>
         <remap from="robot_description" to="/bender/robot_description" />
 		<remap from="/joint_states" to="/bender/joint_states" />
 	</node>
@@ -36,8 +38,8 @@
     </node>
     <group if="$(eval teleop == 'joy')">
         <node pkg="joy" type="joy_node" name="joy_node">
-            <param name="dev" value="/dev/input/js0"/>
-            <param name="deadzone" value="0.05"/>
+            <param name="dev" value="/dev/js_f710"/>
+            <param name="deadzone" value="0.025"/>
             <param name="autorepeat_rate" value="10"/>
         </node>
         <node pkg="teleop_twist_joy" name="logitech_f710" type="teleop_node">
@@ -48,15 +50,18 @@
                     x: 1
                     y: 0
                 scale_linear:
-                    x: 1.0
-                    y: 0.0                  # Set to zero to disable Y velocity (non-holonomic)
+                    x: 0.5
+                    y: 0.5                  # Set to zero to disable Y velocity (non-holonomic)
                 axis_angular:               # Yaw Rotation - Right Stick
                     yaw: 2
                 scale_angular:
-                    yaw: 1.0
+                    yaw: 0.4
                 enable_turbo_button: 6      # Left trigger
-                scale_linear_turbo: 2.5
-                scale_angular_turbo: 2.0
+                scale_linear_turbo:
+                    x: 1.5
+                    y: 1.0
+                scale_angular_turbo:
+                    yaw: 0.785
             </rosparam>
         </node>
     </group>
@@ -79,7 +84,22 @@
             topic   : /bender_teleop/rqt_vel
             timeout : 0.5
             priority: 100
+        locks:
+        -
+            name    : pause
+            topic   : /bender_nav/pause
+            timeout : 0.0
+            priority: 100
+        -
+            name    : joystick
+            topic   : /bender_teleop/joy_priority
+            timeout : 0.0
+            priority: 100
         </rosparam>
     </node>
+
+    <include file="$(find bender_localization)/launch/px4_bringup.launch" />
+    <!-- <include file="$(find bender_localization)/launch/localization_local.launch" /> -->
+    <!-- <include file="$(find bender_localization)/launch/localization_global.launch" /> -->
 
 </launch>
